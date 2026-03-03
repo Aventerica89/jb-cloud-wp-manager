@@ -2,16 +2,16 @@
 
 import * as React from "react"
 import {
-  IconDashboard,
-  IconWorld,
-  IconPackage,
-  IconActivity,
-  IconSettings,
-  IconHelp,
-  IconServer,
-  IconTags,
-  IconFolder,
-} from "@tabler/icons-react"
+  LayoutDashboard,
+  Globe,
+  Package,
+  Activity,
+  Settings,
+  HelpCircle,
+  Server,
+  Tags,
+  Folder,
+} from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
@@ -36,49 +36,49 @@ const data = {
     {
       title: "Dashboard",
       url: "/shadcn-demo",
-      icon: IconDashboard,
+      icon: LayoutDashboard,
     },
     {
       title: "Sites",
       url: "/shadcn-demo/sites",
-      icon: IconWorld,
+      icon: Globe,
     },
     {
       title: "Updates",
       url: "/shadcn-demo/updates",
-      icon: IconPackage,
+      icon: Package,
     },
     {
       title: "Activity",
       url: "/shadcn-demo/activity",
-      icon: IconActivity,
+      icon: Activity,
     },
     {
       title: "Servers",
       url: "/servers",
-      icon: IconServer,
+      icon: Server,
     },
     {
       title: "Projects",
       url: "/projects",
-      icon: IconFolder,
+      icon: Folder,
     },
     {
       title: "Tags",
       url: "/tags",
-      icon: IconTags,
+      icon: Tags,
     },
   ],
   navSecondary: [
     {
       title: "Settings",
       url: "/settings",
-      icon: IconSettings,
+      icon: Settings,
     },
     {
       title: "Help",
       url: "#",
-      icon: IconHelp,
+      icon: HelpCircle,
     },
   ],
 }

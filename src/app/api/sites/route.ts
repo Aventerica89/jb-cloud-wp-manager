@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sites, servers, providers } from "@/lib/db/schema";
-import { eq, ne, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { encrypt } from "@/lib/crypto";
 import { createSiteSchema } from "@/lib/validations";
 import { logger } from "@/lib/activity-logger";
