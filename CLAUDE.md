@@ -13,37 +13,84 @@ A self-hosted WordPress site management dashboard, similar to MainWP but lightwe
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Turso (SQLite edge database)
 - **ORM**: Drizzle ORM
-- **UI**: Tailwind CSS + custom shadcn-style components
-- **Icons**: Lucide React
+- **UI**: Tailwind CSS + shadcn/ui (Radix UI primitives)
+- **Icons**: Lucide React + Tabler Icons
+- **Charts**: Recharts
+- **Tables**: TanStack Table
+- **Drag & Drop**: @dnd-kit
+- **Validation**: Zod
+- **Auth**: Jose (JWT)
+- **Testing**: Vitest + Testing Library
 - **Deployment**: Vercel (recommended)
 
 ## Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API Routes
-│   │   ├── sites/         # Site CRUD + health/plugins endpoints
-│   │   └── sync/          # Bulk sync all sites
-│   ├── dashboard/         # Main dashboard page
-│   └── sites/             # Site management pages
+├── app/
+│   ├── (auth)/                 # Auth route group (login, setup)
+│   ├── (dashboard)/            # Main dashboard layout
+│   ├── activity/               # Activity log page
+│   ├── api/
+│   │   ├── sites/              # Site CRUD + health/plugins/themes
+│   │   ├── sync/               # Bulk sync all sites
+│   │   ├── projects/           # Project management
+│   │   ├── providers/          # Hosting providers
+│   │   ├── servers/            # Server management
+│   │   ├── auth/               # Authentication endpoints
+│   │   ├── activity/           # Activity log API
+│   │   ├── notifications/      # Notification system
+│   │   ├── search/             # Global search
+│   │   ├── settings/           # App settings
+│   │   ├── tags/               # Site tagging
+│   │   ├── updates/            # Update history
+│   │   └── uptime/             # Uptime monitoring
+│   └── shadcn-demo/            # UI component showcase
 ├── components/
-│   └── ui/                # Reusable UI components
+│   ├── ui/                     # shadcn/ui base components
+│   └── updates/                # Update-specific components
 └── lib/
-    ├── db/                # Database client and schema
-    │   ├── index.ts       # Turso/Drizzle client
-    │   └── schema.ts      # Database schema definitions
-    ├── utils.ts           # Utility functions (cn)
-    └── wordpress.ts       # WordPress REST API client
+    ├── db/                     # Turso/Drizzle client + schema
+    ├── auth.ts                 # JWT auth helpers
+    ├── business-logic.ts       # Core domain logic
+    ├── notifications.ts        # Notification dispatch
+    ├── scheduler.ts            # Sync scheduling
+    ├── security-scanner.ts     # Security checks
+    ├── uptime-monitor.ts       # Uptime tracking
+    ├── validation.ts           # Zod schemas
+    └── wordpress.ts            # WP REST API client
 ```
 
 ## Database Schema
 
-- **sites**: WordPress site credentials and status
-- **plugins**: Installed plugins per site
-- **themes**: Installed themes per site
+Data hierarchy: **Project → Provider → Server → Site**
+
+**Core:**
+- **projects**: Top-level grouping (e.g. a client)
+- **providers**: Hosting providers (e.g. xCloud, WP Engine)
+- **servers**: Server instances under a provider
+- **sites**: WordPress sites (belong to a server)
+- **plugins / themes**: Installed per site
 - **wp_users**: WordPress users on remote sites
+
+**Operations:**
 - **activity_log**: Action tracking
+- **update_log**: Plugin/theme update history
+- **tags / site_tags**: Tagging system for sites
+- **scheduled_jobs**: Cron/sync scheduling
+- **backups**: Backup records per site
+
+**Monitoring:**
+- **uptime_checks / uptime_incidents**: Uptime tracking
+- **security_scans**: Security scan results
+- **performance_metrics**: Performance data
+
+**Auth & Notifications:**
+- **users**: App users (JWT auth)
+- **user_site_permissions**: Per-user site access
+- **client_users / client_site_access**: Client portal
+- **notification_settings / notification_history**: Alerts
+- **white_label_settings**: White-label config
 
 ## Getting Started
 
@@ -89,6 +136,12 @@ npm run dev
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests in watch mode (Vitest)
+- `npm run test:run` - Run tests once (CI)
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run env:inject` - Inject secrets from 1Password to `.env.local`
 - `npm run db:push` - Push schema changes to database
 - `npm run db:studio` - Open Drizzle Studio (database GUI)
 - `npm run db:generate` - Generate migration files
@@ -129,35 +182,18 @@ WP Jupiter will automatically detect the connector plugin and use it for syncing
 - `POST /api/sites/[id]/plugins` - Update a plugin
 - `POST /api/sync` - Sync all sites
 
-## MVP Features (Phase 1) - Complete
+## Testing
 
-- [x] Site management (add/edit/delete)
-- [x] Dashboard with status overview
-- [x] Plugin/theme listing with update status
-- [x] Health checks (online/offline status)
-- [x] Bulk sync functionality
-- [x] WP Jupiter Connector plugin for restricted hosts
+Framework: **Vitest** + **@testing-library/react**
 
-## Phase 2 (Core Features) - Complete
+```bash
+npm run test:run       # Run all tests once
+npm run test:coverage  # With coverage report (target: 80%+)
+```
 
-- [x] Bulk plugin/theme updates
-- [x] Activity logging
-- [x] Site credential editing
-- [x] Style guide page
-- [x] TDD utilities (validation, health scoring, scheduling)
-- [x] Migration to official shadcn/ui components
+Test files live alongside source (e.g. `lib/validation.test.ts`, `lib/business-logic.test.ts`).
 
-## Phase 3 (Polish) - Complete
-
-- [x] Dashboard charts (site status pie, updates bar chart)
-- [x] Health score calculation (0-100 scoring)
-- [x] "Sites Needing Attention" section
-- [x] Toast notifications
-- [x] Mobile responsive sidebar
-- [x] Client-side form validation
-- [x] 63 tests with 100% coverage
-
-## Phase 4 (Planned)
+## Roadmap (Phase 4)
 
 - [ ] User management across sites
 - [ ] Scheduled syncing
