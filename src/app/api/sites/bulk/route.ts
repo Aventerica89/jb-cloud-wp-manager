@@ -50,14 +50,14 @@ export async function POST(request: NextRequest) {
           })
           .where(inArray(sites.id, siteIds));
 
-        for (const siteId of siteIds) {
-          await db.insert(activityLog).values({
+        await db.insert(activityLog).values(
+          siteIds.map((siteId) => ({
             siteId,
-            action: "site_updated",
-            status: "info",
+            action: "site_updated" as const,
+            status: "info" as const,
             details: "Site archived via bulk action",
-          });
-        }
+          }))
+        );
 
         results.success = siteIds.length;
         break;
@@ -71,14 +71,14 @@ export async function POST(request: NextRequest) {
           })
           .where(inArray(sites.id, siteIds));
 
-        for (const siteId of siteIds) {
-          await db.insert(activityLog).values({
+        await db.insert(activityLog).values(
+          siteIds.map((siteId) => ({
             siteId,
-            action: "site_updated",
-            status: "info",
+            action: "site_updated" as const,
+            status: "info" as const,
             details: "Site unarchived via bulk action",
-          });
-        }
+          }))
+        );
 
         results.success = siteIds.length;
         break;
@@ -108,15 +108,15 @@ export async function POST(request: NextRequest) {
         break;
 
       case "delete":
-        // HIGH FIX: Log before deletion to avoid foreign key issues
-        for (const siteId of siteIds) {
-          await db.insert(activityLog).values({
+        // Log before deletion to avoid foreign key issues
+        await db.insert(activityLog).values(
+          siteIds.map((siteId) => ({
             siteId,
-            action: "site_deleted",
-            status: "info",
+            action: "site_deleted" as const,
+            status: "info" as const,
             details: "Site marked for deletion via bulk action",
-          });
-        }
+          }))
+        );
 
         // Delete sites (cascade will handle related records)
         await db.delete(sites).where(inArray(sites.id, siteIds));

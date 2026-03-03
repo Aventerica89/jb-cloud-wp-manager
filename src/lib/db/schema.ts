@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 // Projects/folders for organizing sites
@@ -57,7 +57,11 @@ export const sites = sqliteTable("sites", {
   isArchived: integer("is_archived", { mode: "boolean" }).default(false),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
   updatedAt: text("updated_at").$defaultFn(() => new Date().toISOString()),
-});
+}, (t) => [
+  index("idx_sites_archived_favorite_name").on(t.isArchived, t.isFavorite, t.name),
+  index("idx_sites_server_id").on(t.serverId),
+  index("idx_sites_project_id").on(t.projectId),
+]);
 
 // Plugins table - tracks plugins on each site
 export const plugins = sqliteTable("plugins", {
@@ -69,7 +73,10 @@ export const plugins = sqliteTable("plugins", {
   updateAvailable: integer("update_available", { mode: "boolean" }).default(false),
   newVersion: text("new_version"),
   isActive: integer("is_active", { mode: "boolean" }).default(true),
-});
+}, (t) => [
+  index("idx_plugins_site_id").on(t.siteId),
+  index("idx_plugins_site_update").on(t.siteId, t.updateAvailable),
+]);
 
 // Themes table - tracks themes on each site
 export const themes = sqliteTable("themes", {
@@ -81,7 +88,10 @@ export const themes = sqliteTable("themes", {
   updateAvailable: integer("update_available", { mode: "boolean" }).default(false),
   newVersion: text("new_version"),
   isActive: integer("is_active", { mode: "boolean" }).default(false),
-});
+}, (t) => [
+  index("idx_themes_site_id").on(t.siteId),
+  index("idx_themes_site_update").on(t.siteId, t.updateAvailable),
+]);
 
 // WordPress users on remote sites
 export const wpUsers = sqliteTable("wp_users", {
@@ -118,7 +128,10 @@ export const activityLog = sqliteTable("activity_log", {
   status: text("status", { enum: ["success", "failed", "info"] }).default("info"),
   details: text("details"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
-});
+}, (t) => [
+  index("idx_activity_log_created_at").on(t.createdAt),
+  index("idx_activity_log_site_created").on(t.siteId, t.createdAt),
+]);
 
 // Update log for tracking bulk update operations
 export const updateLog = sqliteTable("update_log", {
@@ -134,7 +147,10 @@ export const updateLog = sqliteTable("update_log", {
   startedAt: text("started_at"),
   completedAt: text("completed_at"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
-});
+}, (t) => [
+  index("idx_update_log_site_status").on(t.siteId, t.status),
+  index("idx_update_log_created_at").on(t.createdAt),
+]);
 
 // Relations
 export const projectsRelations = relations(projects, ({ many }) => ({

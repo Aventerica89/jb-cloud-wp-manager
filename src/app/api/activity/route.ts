@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { activityLog, sites } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 
 export async function GET(request: Request) {
   try {
@@ -33,9 +33,11 @@ export async function GET(request: Request) {
       ? await query.where(eq(activityLog.siteId, parseInt(siteId, 10)))
       : await query;
 
-    // Get total count for pagination
-    const allLogs = await db.select({ id: activityLog.id }).from(activityLog);
-    const total = allLogs.length;
+    // Get total count for pagination (DB-side COUNT, not full table fetch)
+    const countQuery = db.select({ total: count() }).from(activityLog);
+    const [{ total }] = siteId
+      ? await countQuery.where(eq(activityLog.siteId, parseInt(siteId, 10)))
+      : await countQuery;
 
     return NextResponse.json({
       logs,

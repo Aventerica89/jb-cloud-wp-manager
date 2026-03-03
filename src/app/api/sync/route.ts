@@ -5,13 +5,31 @@ import { eq } from "drizzle-orm";
 import { decrypt } from "@/lib/crypto";
 import { WordPressAPI } from "@/lib/wordpress";
 
+const CONCURRENCY_LIMIT = 5;
+
+async function runWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = [];
+  for (let i = 0; i < items.length; i += limit) {
+    const chunk = items.slice(i, i + limit);
+    const chunkResults = await Promise.allSettled(chunk.map(fn));
+    results.push(...chunkResults);
+  }
+  return results;
+}
+
 // POST /api/sync - Sync all sites
 export async function POST() {
   try {
     const allSites = await db.query.sites.findMany();
 
-    const results = await Promise.allSettled(
-      allSites.map(async (site) => {
+    const results = await runWithConcurrency(
+      allSites,
+      CONCURRENCY_LIMIT,
+      async (site) => {
         // Decrypt the password before using
         const decryptedPassword = decrypt(site.apiPassword);
 
@@ -82,7 +100,7 @@ export async function POST() {
         }
 
         return { siteId: site.id, status: "online", synced: true };
-      })
+      }
     );
 
     const summary = {

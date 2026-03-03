@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sites, servers, providers } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, ne, and } from "drizzle-orm";
 import { encrypt } from "@/lib/crypto";
 import { createSiteSchema } from "@/lib/validations";
 import { logger } from "@/lib/activity-logger";
@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const includeArchived = request.nextUrl.searchParams.get("includeArchived") === "true";
 
     const allSites = await db.query.sites.findMany({
+      where: includeArchived ? undefined : eq(sites.isArchived, false),
       with: {
         plugins: true,
         themes: true,
@@ -29,14 +30,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Filter archived sites unless requested
-    const filteredSites = includeArchived
-      ? allSites
-      : allSites.filter((s) => !s.isArchived);
-
     // Calculate update counts and strip sensitive data
     // Sort: favorites first, then by name
-    const sitesWithCounts = filteredSites
+    const sitesWithCounts = allSites
       .map((site) => ({
         id: site.id,
         name: site.name,
